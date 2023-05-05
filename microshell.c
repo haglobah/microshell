@@ -2,6 +2,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <string.h>
+#include <stdlib.h>
 
 /*not needed in exam, but necessary if you want to use this tester:
 https://github.com/Glagan/42-exam-rank-04/blob/master/microshell/test.sh*/
@@ -41,7 +42,10 @@ void	exec_cd(char **argv, int i)
 void	exec_stdout(char **argv, int i, int *tmp_fd, char **env)
 {
 	if ( fork() == 0)
-		ft_execute(argv, i, *tmp_fd, env);
+	{
+		if(ft_execute(argv, i, *tmp_fd, env))
+			exit(EXIT_FAILURE);
+	}
 	else
 	{
 		close(*tmp_fd);
@@ -60,7 +64,8 @@ void	exec_pipe(char **argv, int i, int *tmp_fd, char **env)
 		dup2(fd[1], STDOUT_FILENO);
 		close(fd[0]);
 		close(fd[1]);
-		ft_execute(argv, i, *tmp_fd, env);
+		if(ft_execute(argv, i, *tmp_fd, env))
+			exit(EXIT_FAILURE);
 	}
 	else
 	{
@@ -74,7 +79,7 @@ void	exec_cmd(char **argv, int i, int *tmp_fd, char **env)
 {
 	if (strcmp(argv[0], "cd") == 0) //cd
 		exec_cd(argv, i);
-	if (i == 0)
+	else if (i == 0)
 		return ;
 	else if (argv[i] == NULL || strcmp(argv[i], ";") == 0) //exec in stdout
 		exec_stdout(argv, i, tmp_fd, env);
